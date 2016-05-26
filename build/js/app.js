@@ -19,22 +19,21 @@ exports.pingPong = function(goal) {
 };
 
 },{}],3:[function(require,module,exports){
-exports.Temp = function(kelvin) {
-  this.kelvin = kelvin;
-};
+var apiKey = require('./../.env').apiKey;
 
-exports.Temp.prototype.toCelcius = function() {
-  var celsius = this.kelvin -273.15;
-  return "The temperature in celsius is " + celsius.toFixed() + "C .";
+exports.Weather = function(){
 };
 
 
-exports.Temp.prototype.toFahrenheit = function() {
-  var fahrenheit = (this.kelvin * (9/5)) - 459.67;
-  return "The temperature in fahrenheit is " + fahrenheit.toFixed() + "F .";
+exports.Weather.prototype.getWeather = function(city) {
+  $.get('http://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=' + apiKey).then(function(response) {
+    $('.showWeather').text("The humidity in " + city + " is " + response.main.humidity + "%");
+  }).fail(function(error) {
+    $('.showWeather').text(error.responseJSON.message);
+  });
 };
 
-},{}],4:[function(require,module,exports){
+},{"./../.env":1}],4:[function(require,module,exports){
 var pingPong = require('./../js/ping-pong.js').pingPong;
 
 $(document).ready(function(){
@@ -62,30 +61,22 @@ $(document).ready(function(){
   $('#time').text(moment());
 });
 
-var apiKey = require('./../.env').apiKey;
-var Temp = require('./../js/tempConvertion.js').Temp;
+//Link Weather with business logic page
+var Weather = require('./../js/weather.js').Weather;
 
 $(document).ready(function() {
+
+//Objects go here
+  var humidityObject = new Weather();
+
+
+  //jQuery goes here to display result
   $('#weatherLocation').click(function() {
-    var city = $('#location').val();
-    $('#location').val("");
-    $.get('http://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=' + apiKey, function(response) {
-
-
-      var newTemp = new Temp(response.main.temp);
-      var celsius = newTemp.toCelcius();
-      var fahrenheit = newTemp.toFahrenheit();
-
-      $('.showHumidity').text("The humidity in " + city + " is " + response.main.humidity + "%");
-      $('.showTemperatureKelvin').text("The Kelvin temperature in " + city + " is " + response.main.temp + ".");
-      console.log (celsius);
-      console.log (fahrenheit);
-      //for now this shows celsius and fahrenheit to the console
-
-
-        // console.log (JSON.stringify(response));
-      });
-    });
+      var city = $('#location').val();
+      $('#location').val("");
+      var humidity = humidityObject.getWeather(city);
+    $('.showWeather').text("The humidity in " + city + " is " + humidity + "%");
+  });
 });
 
-},{"./../.env":1,"./../js/ping-pong.js":2,"./../js/tempConvertion.js":3}]},{},[4]);
+},{"./../js/ping-pong.js":2,"./../js/weather.js":3}]},{},[4]);
